@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { SyllabusNode } from '@/types';
 import { syllabusRepository } from '@/data/repositories/syllabusRepository';
+import { logActivity } from '@/data/activityLog';
 
 interface SyllabusStore {
   nodes: SyllabusNode[];
@@ -25,6 +26,7 @@ export const useSyllabusStore = create<SyllabusStore>((set, get) => ({
   addNode: async (data) => {
     const node = await syllabusRepository.create(data);
     set({ nodes: [...get().nodes, node] });
+    logActivity('syllabus', node.id, `Added syllabus item "${node.title}"`);
     return node;
   },
 
@@ -32,6 +34,11 @@ export const useSyllabusStore = create<SyllabusStore>((set, get) => ({
     const updated = await syllabusRepository.update(id, changes);
     if (!updated) return;
     set({ nodes: get().nodes.map((n) => (n.id === id ? updated : n)) });
+    const message =
+      changes.progressState === 'completed'
+        ? `Completed syllabus item "${updated.title}"`
+        : `Updated syllabus item "${updated.title}"`;
+    logActivity('syllabus', updated.id, message);
   },
 
   deleteNode: async (id) => {
@@ -48,6 +55,7 @@ export const useSyllabusStore = create<SyllabusStore>((set, get) => ({
     await syllabusRepository.remove(id);
     const nodes = await syllabusRepository.list();
     set({ nodes });
+    if (node) logActivity('syllabus', id, `Deleted syllabus item "${node.title}"`);
   },
 
   overallProgress: () => {
