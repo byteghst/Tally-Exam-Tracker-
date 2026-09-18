@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Task } from '@/types';
 import { taskRepository } from '@/data/repositories/taskRepository';
+import { logActivity } from '@/data/activityLog';
 
 interface TaskStore {
   tasks: Task[];
@@ -24,6 +25,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   addTask: async (data) => {
     const task = await taskRepository.create(data);
+    logActivity('task', task.id, `Added task "${task.name}"`);
     if (task.recurrence && task.date) {
       const horizon = new Date();
       horizon.setDate(horizon.getDate() + 60);
@@ -51,6 +53,14 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     if (!updated) return;
     set({ tasks: get().tasks.map((t) => (t.id === id ? updated : t)) });
 
+    const message =
+      changes.status === 'completed'
+        ? `Completed task "${updated.name}"`
+        : changes.status === 'todo'
+          ? `Reopened task "${updated.name}"`
+          : `Updated task "${updated.name}"`;
+    logActivity('task', updated.id, message);
+
     if (updated.recurrence && updated.date) {
       const horizon = new Date();
       horizon.setDate(horizon.getDate() + 60);
@@ -65,7 +75,9 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   },
 
   deleteTask: async (id) => {
+    const task = get().tasks.find((t) => t.id === id);
     await taskRepository.remove(id);
     set({ tasks: get().tasks.filter((t) => t.id !== id) });
+    if (task) logActivity('task', id, `Deleted task "${task.name}"`);
   }
 }));
