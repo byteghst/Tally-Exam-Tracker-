@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface: 250 251 253;
+  --surface-raised: 255 255 255;
+  --ink: 20 24 33;
+  --ink-muted: 90 99 116;
+  --ink-faint: 150 158 173;
+  --accent: 40 78 254;
+  --accent-soft: 229 234 255;
+  --border: 224 228 235;
+
+  --radius-card: 20px;
+  --radius-control: 12px;
+  --blur: 20px;
+  --glass-alpha: 0.7;
+}
+
+.dark {
+  --surface: 11 18 32;
+  --surface-raised: 20 27 43;
+  --ink: 236 239 244;
+  --ink-muted: 158 167 184;
+  --ink-faint: 100 109 128;
+  --accent: 94 122 254;
+  --accent-soft: 26 42 92;
+  --border: 38 47 66;
+  --glass-alpha: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* manual equivalent of the media query above, driven by Settings → Appearance */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  transition-duration: 80ms !important;
+}
+
+.no-motion *,
+.no-motion *::before,
+.no-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface text-ink antialiased;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+* {
+  @apply border-border;
+}
+
+/* tabular numbers for anything showing scores/stats */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

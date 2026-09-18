@@ -1,0 +1,55 @@
+import { GlassCard } from '@/components/ui/GlassCard';
+import { ProgressBar } from '@/components/ui/Progress';
+import { EmptyState } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import type { Task } from '@/types';
+
+interface TodaysTasksWidgetProps {
+  tasks: Task[];
+  onToggle: (id: string) => void;
+  onAddTask: () => void;
+}
+
+export function TodaysTasksWidget({ tasks, onToggle, onAddTask }: TodaysTasksWidgetProps) {
+  const completed = tasks.filter((t) => t.status === 'completed').length;
+
+  return (
+    <GlassCard className="p-5">
+      <p className="text-sm font-medium text-ink-muted">Today's tasks</p>
+      {tasks.length === 0 ? (
+        <EmptyState
+          title="No tasks today"
+          description="Add a task to see it here."
+          action={
+            <Button size="sm" variant="secondary" onClick={onAddTask}>
+              Add task
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          <p className="mt-2 font-display text-2xl font-semibold tabular-nums">
+            {completed}/{tasks.length}
+          </p>
+          <ProgressBar value={(completed / tasks.length) * 100} className="mt-3" />
+          <ul className="mt-4 space-y-2">
+            {tasks.slice(0, 4).map((task) => (
+              <li key={task.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={task.status === 'completed'}
+                  onChange={() => onToggle(task.id)}
+                  aria-label={`Mark "${task.name}" ${task.status === 'completed' ? 'incomplete' : 'complete'}`}
+                  className="h-4 w-4 rounded accent-accent"
+                />
+                <span className={task.status === 'completed' ? 'text-ink-faint line-through' : 'text-ink'}>
+                  {task.name}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </GlassCard>
+  );
+}
