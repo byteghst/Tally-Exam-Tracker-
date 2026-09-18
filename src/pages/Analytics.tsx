@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/Badge';
+import { ExamScoreTrendChart } from '@/components/features/analytics/ExamScoreTrendChart';
+import { TaskCompletionTrendChart } from '@/components/features/analytics/TaskCompletionTrendChart';
 import { useExamStore } from '@/store/examStore';
 import { useTaskStore } from '@/store/taskStore';
 import { calculateScore } from '@/lib/scoring';
@@ -65,6 +67,11 @@ export function Analytics() {
         <MetricCard label="Average percentage" value={avgPercentage !== null ? `${avgPercentage}%` : '—'} />
         <MetricCard label="Total tasks" value={tasks.length} />
         <MetricCard label="Task completion" value={taskCompletionRate !== null ? `${taskCompletionRate}%` : '—'} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ExamScoreTrendChart exams={completedExams} />
+        <TaskCompletionTrendChart tasks={tasks} />
       </div>
     </div>
   );
