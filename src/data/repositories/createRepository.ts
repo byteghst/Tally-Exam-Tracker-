@@ -53,6 +53,15 @@ export function createRepository<T extends BaseEntity>(table: Table<T, string>) 
       await table.delete(id);
     },
 
+    /**
+     * Re-inserts a previously-fetched entity exactly as it was, id and all —
+     * used to support "Undo" after a delete, as opposed to `create` which
+     * always mints a new id.
+     */
+    async restore(entity: T): Promise<void> {
+      await table.add(entity);
+    },
+
     async duplicate(id: string, overrides: Partial<T> = {}): Promise<T | undefined> {
       const existing = await table.get(id);
       if (!existing) return undefined;

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ExamForm } from '@/components/features/exams/ExamForm';
 import { useExamStore } from '@/store/examStore';
 import { useUIStore } from '@/store/uiStore';
 import { calculateScore } from '@/lib/scoring';
+import { compareToPrevious } from '@/lib/examComparison';
 import { formatDate } from '@/lib/dates';
 
 export function ExamDetail() {
@@ -17,7 +18,6 @@ export function ExamDetail() {
   const { pushToast } = useUIStore();
 
   const [editOpen, setEditOpen] = useState(false);
-  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (exams.length === 0) hydrate();
@@ -49,6 +49,8 @@ export function ExamDetail() {
     exam.totalQuestions
   );
 
+  const comparison = exam.status === 'completed' ? compareToPrevious(exam, exams) : undefined;
+
   async function handleDuplicate() {
     await duplicateExam(exam!.id);
     pushToast('Exam duplicated');
@@ -56,8 +58,8 @@ export function ExamDetail() {
   }
 
   async function handleArchive() {
+    // archiveExam already shows its own "Archived + Undo" toast
     await archiveExam(exam!.id);
-    pushToast('Exam archived');
     navigate('/exams');
   }
 
@@ -82,10 +84,31 @@ export function ExamDetail() {
         <Button size="sm" variant="secondary" onClick={handleDuplicate}>
           Duplicate
         </Button>
-        <Button size="sm" variant="danger" onClick={() => setArchiveConfirmOpen(true)}>
+        <Button size="sm" variant="danger" onClick={handleArchive}>
           Archive
         </Button>
       </div>
+
+      {comparison?.previousExam && (comparison.percentageDiff !== null || comparison.rankDiff !== null) && (
+        <GlassCard className="flex flex-wrap gap-6 p-5">
+          {comparison.percentageDiff !== null && (
+            <ComparisonStat
+              label="Score vs. previous"
+              diff={comparison.percentageDiff}
+              unit="%"
+              detail={`${comparison.previousPercentage}% → ${comparison.currentPercentage}%`}
+            />
+          )}
+          {comparison.rankDiff !== null && (
+            <ComparisonStat
+              label="Rank vs. previous"
+              diff={comparison.rankDiff}
+              unit=" places"
+              detail={`${comparison.previousExam.rank} → ${exam.rank}`}
+            />
+          )}
+        </GlassCard>
+      )}
 
       <GlassCard className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
         <Stat label="Final score" value={score.finalScore} />
@@ -112,15 +135,36 @@ export function ExamDetail() {
       )}
 
       <ExamForm open={editOpen} onClose={() => setEditOpen(false)} exam={exam} />
+    </div>
+  );
+}
 
-      <ConfirmDialog
-        open={archiveConfirmOpen}
-        onClose={() => setArchiveConfirmOpen(false)}
-        onConfirm={handleArchive}
-        title="Archive this exam?"
-        description="It'll be removed from your active exam lists but the data isn't deleted — you can still access it from a backup export."
-        confirmLabel="Archive"
-      />
+function ComparisonStat({
+  label,
+  diff,
+  unit,
+  detail
+}: {
+  label: string;
+  diff: number;
+  unit: string;
+  detail: string;
+}) {
+  const improved = diff > 0;
+  const flat = diff === 0;
+  const Icon = improved ? TrendingUp : TrendingDown;
+  const tone = flat ? 'text-ink-muted' : improved ? 'text-success' : 'text-danger';
+
+  return (
+    <div>
+      <p className="text-xs text-ink-faint">{label}</p>
+      <div className={`mt-1 flex items-center gap-1.5 font-display text-lg font-semibold tabular-nums ${tone}`}>
+        {!flat && <Icon size={18} />}
+        <span>
+          {flat ? 'No change' : `${improved ? '+' : ''}${diff}${unit}`}
+        </span>
+      </div>
+      <p className="text-xs text-ink-faint">{detail}</p>
     </div>
   );
 }

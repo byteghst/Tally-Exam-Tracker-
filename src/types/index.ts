@@ -159,8 +159,18 @@ export interface AppSettings {
   defaultTaskPriority: TaskPriority;
   notificationPrefs: NotificationPrefs;
   dashboardLayout: WidgetConfig[];
+  /** Also doubles as "show Momentum tracker on Dashboard" — the momentum
+   *  strip IS the streak feature, just computed from real activity-log data
+   *  rather than a separate counter. */
   streaksEnabled: boolean;
   onboardingCompleted: boolean;
+  /** Optional local display name for the Dashboard greeting. No accounts,
+   *  no auth — purely a personalization string. */
+  userName?: string;
+  showFocusNow: boolean;
+  showDailyMission: boolean;
+  /** ISO date the Daily Mission was last dismissed; hides it for that day only. */
+  dailyMissionDismissedDate?: string;
 }
 
 // ---------- Scoring engine I/O ----------

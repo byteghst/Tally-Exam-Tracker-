@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Exam } from '@/types';
 import { examRepository } from '@/data/repositories/examRepository';
 import { logActivity } from '@/data/activityLog';
+import { useUIStore } from '@/store/uiStore';
 
 interface ExamStore {
   exams: Exam[];
@@ -42,7 +43,17 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const exam = get().exams.find((e) => e.id === id);
     await examRepository.archive(id);
     set({ exams: get().exams.filter((e) => e.id !== id) });
-    if (exam) logActivity('exam', id, `Archived exam "${exam.name}"`);
+    if (exam) {
+      logActivity('exam', id, `Archived exam "${exam.name}"`);
+      useUIStore.getState().pushToast(`Archived "${exam.name}"`, {
+        label: 'Undo',
+        onClick: async () => {
+          await examRepository.unarchive(id);
+          const exams = await examRepository.list();
+          set({ exams });
+        }
+      });
+    }
   },
 
   deleteExam: async (id) => {

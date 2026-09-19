@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Deadline } from '@/types';
 import { deadlineRepository } from '@/data/repositories/deadlineRepository';
 import { logActivity } from '@/data/activityLog';
+import { useUIStore } from '@/store/uiStore';
 
 interface DeadlineStore {
   deadlines: Deadline[];
@@ -49,6 +50,16 @@ export const useDeadlineStore = create<DeadlineStore>((set, get) => ({
     const deadline = get().deadlines.find((d) => d.id === id);
     await deadlineRepository.remove(id);
     set({ deadlines: get().deadlines.filter((d) => d.id !== id) });
-    if (deadline) logActivity('deadline', id, `Deleted deadline "${deadline.title}"`);
+    if (deadline) {
+      logActivity('deadline', id, `Deleted deadline "${deadline.title}"`);
+      useUIStore.getState().pushToast(`Deleted "${deadline.title}"`, {
+        label: 'Undo',
+        onClick: async () => {
+          await deadlineRepository.restore(deadline);
+          const deadlines = await deadlineRepository.withComputedStatus();
+          set({ deadlines });
+        }
+      });
+    }
   }
 }));

@@ -3,7 +3,6 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge, EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { DeadlineForm } from '@/components/features/deadlines/DeadlineForm';
 import { useDeadlineStore } from '@/store/deadlineStore';
 import { useOpenAddFromNavState } from '@/hooks/useOpenAddFromNavState';
@@ -22,7 +21,6 @@ export function Deadlines() {
   const { deadlines, hydrate, completeDeadline, deleteDeadline } = useDeadlineStore();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Deadline | undefined>(undefined);
-  const [deleteTarget, setDeleteTarget] = useState<Deadline | undefined>(undefined);
 
   useOpenAddFromNavState(() => {
     setEditing(undefined);
@@ -55,10 +53,7 @@ export function Deadlines() {
       </header>
 
       {active.length === 0 ? (
-        <EmptyState
-          title="No deadlines yet"
-          description="Registration dates, submissions and forms will show up here."
-          action={
+        <EmptyState title="No deadlines coming up" description="Registration dates and submissions will show up here." action={
             <Button size="sm" onClick={openAdd}>
               Add your first deadline
             </Button>
@@ -89,7 +84,7 @@ export function Deadlines() {
                   <Pencil size={16} />
                 </button>
                 <button
-                  onClick={() => setDeleteTarget(deadline)}
+                  onClick={() => deleteDeadline(deadline.id)}
                   aria-label={`Delete ${deadline.title}`}
                   className="rounded-control p-1.5 text-ink-muted hover:bg-danger/10 hover:text-danger"
                 >
@@ -102,15 +97,6 @@ export function Deadlines() {
       )}
 
       <DeadlineForm open={formOpen} onClose={() => setFormOpen(false)} deadline={editing} />
-
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(undefined)}
-        onConfirm={() => deleteTarget && deleteDeadline(deleteTarget.id)}
-        title="Delete this deadline?"
-        description={`"${deleteTarget?.title}" will be permanently removed. This can't be undone.`}
-        confirmLabel="Delete"
-      />
     </div>
   );
 }

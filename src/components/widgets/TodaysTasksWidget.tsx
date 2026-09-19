@@ -18,8 +18,8 @@ export function TodaysTasksWidget({ tasks, onToggle, onAddTask }: TodaysTasksWid
       <p className="text-sm font-medium text-ink-muted">Today's tasks</p>
       {tasks.length === 0 ? (
         <EmptyState
-          title="No tasks today"
-          description="Add a task to see it here."
+          title="You're clear"
+          description="Nothing needs your attention today."
           action={
             <Button size="sm" variant="secondary" onClick={onAddTask}>
               Add task
@@ -40,9 +40,13 @@ export function TodaysTasksWidget({ tasks, onToggle, onAddTask }: TodaysTasksWid
                   checked={task.status === 'completed'}
                   onChange={() => onToggle(task.id)}
                   aria-label={`Mark "${task.name}" ${task.status === 'completed' ? 'incomplete' : 'complete'}`}
-                  className="h-4 w-4 rounded accent-accent"
+                  className="h-4 w-4 rounded accent-accent transition-transform duration-150 active:scale-90"
                 />
-                <span className={task.status === 'completed' ? 'text-ink-faint line-through' : 'text-ink'}>
+                <span
+                  className={`transition-colors duration-300 ${
+                    task.status === 'completed' ? 'text-ink-faint line-through' : 'text-ink'
+                  }`}
+                >
                   {task.name}
                 </span>
               </li>

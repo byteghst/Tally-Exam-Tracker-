@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Task } from '@/types';
 import { taskRepository } from '@/data/repositories/taskRepository';
 import { logActivity } from '@/data/activityLog';
+import { useUIStore } from '@/store/uiStore';
 
 interface TaskStore {
   tasks: Task[];
@@ -78,6 +79,16 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     const task = get().tasks.find((t) => t.id === id);
     await taskRepository.remove(id);
     set({ tasks: get().tasks.filter((t) => t.id !== id) });
-    if (task) logActivity('task', id, `Deleted task "${task.name}"`);
+    if (task) {
+      logActivity('task', id, `Deleted task "${task.name}"`);
+      useUIStore.getState().pushToast(`Deleted "${task.name}"`, {
+        label: 'Undo',
+        onClick: async () => {
+          await taskRepository.restore(task);
+          const tasks = await taskRepository.list();
+          set({ tasks });
+        }
+      });
+    }
   }
 }));

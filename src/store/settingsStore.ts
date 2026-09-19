@@ -25,7 +25,9 @@ const DEFAULT_SETTINGS: AppSettings = {
     { id: 'syllabus-progress', visible: true, order: 3, size: 'md' }
   ],
   streaksEnabled: true,
-  onboardingCompleted: false
+  onboardingCompleted: false,
+  showFocusNow: true,
+  showDailyMission: true
 };
 
 interface SettingsStore {

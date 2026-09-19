@@ -3,7 +3,6 @@ import { Pencil, Trash2, Repeat } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { TaskForm } from '@/components/features/tasks/TaskForm';
 import { useTaskStore } from '@/store/taskStore';
 import { useOpenAddFromNavState } from '@/hooks/useOpenAddFromNavState';
@@ -14,7 +13,6 @@ export function Tasks() {
   const { tasks, hydrate, toggleComplete, deleteTask } = useTaskStore();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Task | undefined>(undefined);
-  const [deleteTarget, setDeleteTarget] = useState<Task | undefined>(undefined);
 
   useOpenAddFromNavState(() => {
     setEditing(undefined);
@@ -53,8 +51,8 @@ export function Tasks() {
         <h2 className="text-sm font-semibold text-ink-muted">Today</h2>
         {today.length === 0 ? (
           <EmptyState
-            title="Nothing scheduled today"
-            description="Add a task to get started."
+            title="You're clear"
+            description="Nothing needs your attention today."
             action={
               <Button size="sm" onClick={openAdd}>
                 Add a task
@@ -69,7 +67,7 @@ export function Tasks() {
                 task={task}
                 onToggle={() => toggleComplete(task.id)}
                 onEdit={() => openEdit(task)}
-                onDelete={() => setDeleteTarget(task)}
+                onDelete={() => deleteTask(task.id)}
               />
             ))}
           </div>
@@ -86,7 +84,7 @@ export function Tasks() {
                 task={task}
                 onToggle={() => toggleComplete(task.id)}
                 onEdit={() => openEdit(task)}
-                onDelete={() => setDeleteTarget(task)}
+                onDelete={() => deleteTask(task.id)}
               />
             ))}
           </div>
@@ -94,19 +92,6 @@ export function Tasks() {
       )}
 
       <TaskForm open={formOpen} onClose={() => setFormOpen(false)} task={editing} />
-
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(undefined)}
-        onConfirm={() => deleteTarget && deleteTask(deleteTarget.id)}
-        title="Delete this task?"
-        description={
-          deleteTarget?.seriesId
-            ? `"${deleteTarget?.name}" will be removed. Other instances in its repeating series are not affected.`
-            : `"${deleteTarget?.name}" will be permanently removed. This can't be undone.`
-        }
-        confirmLabel="Delete"
-      />
     </div>
   );
 }
@@ -130,9 +115,13 @@ function TaskRow({
         checked={done}
         onChange={onToggle}
         aria-label={`Mark "${task.name}" ${done ? 'incomplete' : 'complete'}`}
-        className="h-4 w-4 shrink-0 rounded accent-accent"
+        className="h-4 w-4 shrink-0 rounded accent-accent transition-transform duration-150 active:scale-90"
       />
-      <span className={`min-w-0 flex-1 truncate ${done ? 'text-ink-faint line-through' : 'text-ink'}`}>
+      <span
+        className={`min-w-0 flex-1 truncate transition-colors duration-300 ${
+          done ? 'text-ink-faint line-through' : 'text-ink'
+        }`}
+      >
         {task.name}
       </span>
       {task.recurrence && <Repeat size={14} className="shrink-0 text-ink-faint" aria-label="Repeating task" />}

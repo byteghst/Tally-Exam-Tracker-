@@ -11,7 +11,7 @@ export type DashboardWidgetId = (typeof DASHBOARD_WIDGET_IDS)[number];
 
 export const WIDGET_LABELS: Record<DashboardWidgetId, string> = {
   'todays-tasks': "Today's tasks",
-  'upcoming-exam': 'Upcoming exam',
+  'upcoming-exam': 'Next exam',
   'next-deadline': 'Next deadline',
   'syllabus-progress': 'Syllabus progress'
 };

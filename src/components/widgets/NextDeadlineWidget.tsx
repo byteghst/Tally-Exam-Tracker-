@@ -21,8 +21,8 @@ export function NextDeadlineWidget({
         </>
       ) : (
         <EmptyState
-          title="No deadlines"
-          description="Track registration dates and submissions here."
+          title="No deadlines coming up"
+          description="Registration dates and submissions will show up here."
           action={
             <Button size="sm" variant="secondary" onClick={onAddDeadline}>
               Add deadline

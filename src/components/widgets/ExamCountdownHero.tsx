@@ -1,0 +1,81 @@
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Badge, EmptyState } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { ProgressBar } from '@/components/ui/Progress';
+import { daysBetween, todayISO, formatDate } from '@/lib/dates';
+import type { Exam } from '@/types';
+
+interface ExamCountdownHeroProps {
+  exam?: Exam;
+  /** Overall syllabus progress (0-100) — shown as general study context, never
+   *  implied to be specific to this exam, since the data model doesn't link
+   *  syllabus items to individual exams. */
+  syllabusProgress?: number;
+  onAddExam: () => void;
+}
+
+export function ExamCountdownHero({ exam, syllabusProgress, onAddExam }: ExamCountdownHeroProps) {
+  if (!exam) {
+    return (
+      <GlassCard className="p-5">
+        <p className="text-sm font-medium text-ink-muted">Next exam</p>
+        <EmptyState
+          title="No upcoming exams"
+          description="Exams you add will show up here."
+          action={
+            <Button size="sm" variant="secondary" onClick={onAddExam}>
+              Add exam
+            </Button>
+          }
+        />
+      </GlassCard>
+    );
+  }
+
+  const days = daysBetween(todayISO(), exam.date);
+  const hasScore = exam.correct !== undefined || exam.manualScoreOverride !== undefined;
+
+  return (
+    <Link to={`/exams/${exam.id}`}>
+      <GlassCard interactive className="p-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Next exam</p>
+            <p className="mt-0.5 font-display text-lg font-semibold text-ink">{exam.name}</p>
+          </div>
+          <Badge tone={exam.type === 'daily' ? 'accent' : 'neutral'}>{exam.type}</Badge>
+        </div>
+
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="font-display text-5xl font-bold tabular-nums text-accent">
+            {Math.max(days, 0)}
+          </span>
+          <span className="text-sm font-medium uppercase tracking-wide text-ink-muted">
+            {days === 0 ? 'today' : days === 1 ? 'day' : 'days'}
+          </span>
+        </div>
+        <p className="text-xs text-ink-faint">{formatDate(exam.date)}</p>
+
+        {syllabusProgress !== undefined && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs text-ink-faint">
+              <span>Overall syllabus progress</span>
+              <span className="tabular-nums">{syllabusProgress}%</span>
+            </div>
+            <ProgressBar value={syllabusProgress} className="mt-1" />
+          </div>
+        )}
+
+        {hasScore && (
+          <p className="mt-3 text-xs text-ink-faint">A result is already recorded for this exam.</p>
+        )}
+
+        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent">
+          Open exam <ArrowRight size={16} />
+        </span>
+      </GlassCard>
+    </Link>
+  );
+}

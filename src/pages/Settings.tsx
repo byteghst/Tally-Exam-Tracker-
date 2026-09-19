@@ -2,17 +2,21 @@ import { useState } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ImportDialog } from '@/components/features/settings/ImportDialog';
 import { useSettingsStore } from '@/store/settingsStore';
 import { exportBackup, downloadBackupFile } from '@/data/backup';
 import { normalizeLayout, WIDGET_LABELS } from '@/lib/dashboardWidgets';
-import type { ThemeMode } from '@/types';
+import type { ThemeMode, DensityLevel } from '@/types';
 
 const THEME_OPTIONS: ThemeMode[] = ['light', 'dark', 'system'];
+const DENSITY_OPTIONS: DensityLevel[] = ['comfortable', 'compact'];
 
 export function Settings() {
   const { settings, updateSettings, resetSettings } = useSettingsStore();
   const [importOpen, setImportOpen] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
 
   const widgetItems = normalizeLayout(settings.dashboardLayout);
 
@@ -32,6 +36,16 @@ export function Settings() {
   return (
     <div className="space-y-6 py-6">
       <h1 className="font-display text-2xl font-semibold text-ink">Settings</h1>
+
+      <GlassCard className="space-y-3 p-5">
+        <h2 className="font-medium text-ink">Personal</h2>
+        <Input
+          label="Your name (optional)"
+          value={settings.userName ?? ''}
+          onChange={(e) => updateSettings({ userName: e.target.value || undefined })}
+          placeholder="Used for the Dashboard greeting only — nothing is sent anywhere"
+        />
+      </GlassCard>
 
       <GlassCard className="space-y-4 p-5">
         <h2 className="font-medium text-ink">Appearance</h2>
@@ -100,7 +114,55 @@ export function Settings() {
 
       <GlassCard className="space-y-3 p-5">
         <h2 className="font-medium text-ink">Dashboard</h2>
-        <p className="text-sm text-ink-muted">Choose which widgets show on your Dashboard, and in what order.</p>
+
+        <div className="space-y-2">
+          <label className="flex items-center justify-between rounded-control border border-border p-3 text-sm text-ink">
+            Momentum tracker
+            <input
+              type="checkbox"
+              checked={settings.streaksEnabled}
+              onChange={(e) => updateSettings({ streaksEnabled: e.target.checked })}
+              className="h-4 w-4 rounded accent-accent"
+            />
+          </label>
+          <label className="flex items-center justify-between rounded-control border border-border p-3 text-sm text-ink">
+            Focus Now
+            <input
+              type="checkbox"
+              checked={settings.showFocusNow}
+              onChange={(e) => updateSettings({ showFocusNow: e.target.checked })}
+              className="h-4 w-4 rounded accent-accent"
+            />
+          </label>
+          <label className="flex items-center justify-between rounded-control border border-border p-3 text-sm text-ink">
+            Daily Mission
+            <input
+              type="checkbox"
+              checked={settings.showDailyMission}
+              onChange={(e) => updateSettings({ showDailyMission: e.target.checked })}
+              className="h-4 w-4 rounded accent-accent"
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-ink-muted">Density</span>
+          <div className="flex gap-2">
+            {DENSITY_OPTIONS.map((d) => (
+              <button
+                key={d}
+                onClick={() => updateSettings({ density: d })}
+                className={`rounded-full px-3.5 py-1.5 text-sm font-medium capitalize ${
+                  settings.density === d ? 'bg-accent text-white' : 'bg-white/5 text-ink-muted'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-sm text-ink-muted">Choose which widgets show below, and in what order.</p>
         <div className="space-y-2">
           {widgetItems.map((w, i) => (
             <div key={w.id} className="flex items-center justify-between rounded-control border border-border p-3">
@@ -155,10 +217,19 @@ export function Settings() {
       <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} />
 
       <GlassCard className="p-5">
-        <Button variant="danger" size="sm" onClick={resetSettings}>
+        <Button variant="danger" size="sm" onClick={() => setResetConfirmOpen(true)}>
           Reset settings to default
         </Button>
       </GlassCard>
+
+      <ConfirmDialog
+        open={resetConfirmOpen}
+        onClose={() => setResetConfirmOpen(false)}
+        onConfirm={resetSettings}
+        title="Reset all settings?"
+        description="Theme, dashboard layout, and every preference here goes back to default. Your exams, tasks, deadlines and syllabus data are not affected."
+        confirmLabel="Reset"
+      />
     </div>
   );
 }

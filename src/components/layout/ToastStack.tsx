@@ -11,7 +11,7 @@ export function ToastStack() {
         <div
           key={toast.id}
           role="status"
-          className="flex items-center justify-between gap-3 rounded-control border border-border bg-surface-raised px-4 py-3 shadow-glass"
+          className="toast-enter flex items-center justify-between gap-3 rounded-control border border-border bg-surface-raised px-4 py-3 shadow-glass"
         >
           <span className="text-sm text-ink">{toast.message}</span>
           {toast.action && (

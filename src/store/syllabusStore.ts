@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { SyllabusNode } from '@/types';
 import { syllabusRepository } from '@/data/repositories/syllabusRepository';
 import { logActivity } from '@/data/activityLog';
+import { useUIStore } from '@/store/uiStore';
 
 interface SyllabusStore {
   nodes: SyllabusNode[];
@@ -44,6 +45,7 @@ export const useSyllabusStore = create<SyllabusStore>((set, get) => ({
   deleteNode: async (id) => {
     const node = get().nodes.find((n) => n.id === id);
     const children = get().nodes.filter((n) => n.parentId === id);
+    const childOriginalParents = children.map((c) => ({ id: c.id, parentId: c.parentId }));
 
     // promote direct children up to the deleted node's own parent so they
     // stay reachable in the tree instead of pointing at a parentId that no
@@ -55,7 +57,25 @@ export const useSyllabusStore = create<SyllabusStore>((set, get) => ({
     await syllabusRepository.remove(id);
     const nodes = await syllabusRepository.list();
     set({ nodes });
-    if (node) logActivity('syllabus', id, `Deleted syllabus item "${node.title}"`);
+
+    if (node) {
+      logActivity('syllabus', id, `Deleted syllabus item "${node.title}"`);
+      const toastMessage =
+        children.length > 0
+          ? `Deleted "${node.title}" — ${children.length} item${children.length === 1 ? '' : 's'} moved up a level`
+          : `Deleted "${node.title}"`;
+      useUIStore.getState().pushToast(toastMessage, {
+        label: 'Undo',
+        onClick: async () => {
+          await syllabusRepository.restore(node);
+          for (const c of childOriginalParents) {
+            await syllabusRepository.update(c.id, { parentId: c.parentId });
+          }
+          const nodes = await syllabusRepository.list();
+          set({ nodes });
+        }
+      });
+    }
   },
 
   overallProgress: () => {

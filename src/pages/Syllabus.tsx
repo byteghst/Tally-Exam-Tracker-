@@ -3,7 +3,6 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { ProgressRing } from '@/components/ui/Progress';
 import { EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { SyllabusForm } from '@/components/features/syllabus/SyllabusForm';
 import { SyllabusTree } from '@/components/features/syllabus/SyllabusTree';
 import { useSyllabusStore } from '@/store/syllabusStore';
@@ -15,7 +14,6 @@ export function Syllabus() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<SyllabusNode | undefined>(undefined);
   const [defaultParentId, setDefaultParentId] = useState<string | undefined>(undefined);
-  const [deleteTarget, setDeleteTarget] = useState<SyllabusNode | undefined>(undefined);
 
   useOpenAddFromNavState(() => {
     setEditing(undefined);
@@ -26,8 +24,6 @@ export function Syllabus() {
   useEffect(() => {
     hydrate();
   }, [hydrate]);
-
-  const childCount = deleteTarget ? nodes.filter((n) => n.parentId === deleteTarget.id).length : 0;
 
   function openAdd() {
     setEditing(undefined);
@@ -71,8 +67,8 @@ export function Syllabus() {
 
       {nodes.length === 0 ? (
         <EmptyState
-          title="No syllabus items yet"
-          description="Nothing is predefined — add your own course/chapter/topic structure."
+          title="Your syllabus is empty"
+          description="Add your first topic to start tracking progress."
           action={
             <Button size="sm" onClick={openAdd}>
               Create your first item
@@ -80,12 +76,7 @@ export function Syllabus() {
           }
         />
       ) : (
-        <SyllabusTree
-          nodes={nodes}
-          onEdit={openEdit}
-          onAddChild={openAddChild}
-          onDelete={(node) => setDeleteTarget(node)}
-        />
+        <SyllabusTree nodes={nodes} onEdit={openEdit} onAddChild={openAddChild} onDelete={(node) => deleteNode(node.id)} />
       )}
 
       <SyllabusForm
@@ -93,19 +84,6 @@ export function Syllabus() {
         onClose={() => setFormOpen(false)}
         node={editing}
         defaultParentId={defaultParentId}
-      />
-
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(undefined)}
-        onConfirm={() => deleteTarget && deleteNode(deleteTarget.id)}
-        title="Delete this item?"
-        description={
-          childCount > 0
-            ? `"${deleteTarget?.title}" has ${childCount} item${childCount === 1 ? '' : 's'} under it. They'll move up one level instead of being deleted.`
-            : `"${deleteTarget?.title}" will be permanently removed. This can't be undone.`
-        }
-        confirmLabel="Delete"
       />
     </div>
   );
