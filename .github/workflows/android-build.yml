@@ -37,7 +37,7 @@ jobs:
           java-version: '17'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Generate branded icons and splash screen
         run: npx --yes @capacitor/assets generate --android
