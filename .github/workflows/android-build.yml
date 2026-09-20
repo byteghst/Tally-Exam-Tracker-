@@ -41,10 +41,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
         with:
-          packages: 'platform-tools'
-
-      - name: Generate Capacitor assets
-        run: npx capacitor-assets generate
+          packages: 'platform-tools
 
       - name: Sync native project
         run: npx cap sync android
