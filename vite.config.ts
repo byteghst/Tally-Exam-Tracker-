@@ -8,6 +8,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registration is done manually in main.tsx, gated on NOT running
+      // inside Capacitor — a service worker has no purpose in the native
+      // app (Capacitor already serves everything locally) and can actively
+      // cause stale-app-code bugs there if one gets registered and survives
+      // an APK update.
+      injectRegister: false,
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-512-maskable.png'],
       manifest: {
         name: 'Tally',
