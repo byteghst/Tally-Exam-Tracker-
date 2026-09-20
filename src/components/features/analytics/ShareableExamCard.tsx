@@ -137,12 +137,23 @@ export function ShareableExamCard({
         .slice(0, 10)}.png`;
 
       if (Capacitor.isNativePlatform()) {
+        const permission = await Filesystem.checkPermissions();
+
+        if (permission.publicStorage !== 'granted') {
+          const requested = await Filesystem.requestPermissions();
+
+          if (requested.publicStorage !== 'granted') {
+            throw new Error('Storage permission was not granted');
+          }
+        }
+
         const base64Data = await blobToBase64(blob);
 
         await Filesystem.writeFile({
           path: fileName,
           data: base64Data,
           directory: Directory.Documents,
+          recursive: true,
         });
 
         return;
