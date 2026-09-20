@@ -24,7 +24,7 @@
     "zod": "^3.23.8",
     "@capacitor/core": "^6.1.2",
     "@capacitor/android": "^6.1.2",
-    "@capacitor/filesystem": "^6.1.2"
+    "@capacitor/filesystem": "^6.0.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",
