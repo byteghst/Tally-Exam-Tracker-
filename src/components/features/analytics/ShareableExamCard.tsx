@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Download, Share2 } from 'lucide-react';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 import { Sheet } from '@/components/ui/Sheet';
 import { Button } from '@/components/ui/Button';
-import { drawExamTrendCard, CARD_WIDTH, CARD_HEIGHT } from '@/lib/shareCard/drawExamTrendCard';
+import {
+  drawExamTrendCard,
+  CARD_WIDTH,
+  CARD_HEIGHT,
+} from '@/lib/shareCard/drawExamTrendCard';
 import type { ExamTrendPoint } from '@/lib/examTrend';
 
 interface ShareableExamCardProps {
@@ -13,9 +19,13 @@ interface ShareableExamCardProps {
 
 const ANIMATION_MS = 1400;
 
-export function ShareableExamCard({ open, onClose, points }: ShareableExamCardProps) {
+export function ShareableExamCard({
+  open,
+  onClose,
+  points,
+}: ShareableExamCardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | null>(null);
   const [canShareFiles, setCanShareFiles] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -23,18 +33,23 @@ export function ShareableExamCard({ open, onClose, points }: ShareableExamCardPr
     setCanShareFiles(
       typeof navigator !== 'undefined' &&
         'canShare' in navigator &&
-        navigator.canShare?.({ files: [new File([], 'test.png', { type: 'image/png' })] }) === true
+        navigator.canShare?.({
+          files: [new File([], 'test.png', { type: 'image/png' })],
+        }) === true
     );
   }, []);
 
   useEffect(() => {
     if (!open || points.length < 2) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
+
     canvas.width = CARD_WIDTH * dpr;
     canvas.height = CARD_HEIGHT * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -43,25 +58,25 @@ export function ShareableExamCard({ open, onClose, points }: ShareableExamCardPr
     let start: number | null = null;
 
     async function run() {
-      // wait for the brand fonts to be ready so canvas text doesn't fall
-      // back to a system font for the first frame or two
       if ('fonts' in document) {
         try {
           await document.fonts.ready;
-        } catch {
-          // proceed with whatever's loaded — a fallback font beats no card
-        }
+        } catch {}
       }
+
       if (cancelled) return;
 
       const step = (timestamp: number) => {
         if (start === null) start = timestamp;
+
         const progress = (timestamp - start) / ANIMATION_MS;
         drawExamTrendCard(ctx!, points, progress);
+
         if (progress < 1 && !cancelled) {
           rafRef.current = requestAnimationFrame(step);
         }
       };
+
       rafRef.current = requestAnimationFrame(step);
     }
 
@@ -69,39 +84,82 @@ export function ShareableExamCard({ open, onClose, points }: ShareableExamCardPr
 
     return () => {
       cancelled = true;
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
-    // points is derived fresh each render from the store; re-running the
-    // animation on every parent re-render would be jarring, so this only
-    // keys off `open` — the sheet is remounted-in-effect each time it opens
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, points]);
 
   function getFinalBlob(): Promise<Blob> {
     return new Promise((resolve, reject) => {
       const canvas = canvasRef.current;
       if (!canvas) return reject(new Error('Canvas not ready'));
+
       const ctx = canvas.getContext('2d');
       if (!ctx) return reject(new Error('Canvas not ready'));
-      // force the crisp final frame regardless of where the animation was
+
       drawExamTrendCard(ctx, points, 1);
-      canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error('Could not generate image'));
-      }, 'image/png');
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Could not generate image'));
+        },
+        'image/png'
+      );
     });
+  }
+
+  async function blobToBase64(blob: Blob): Promise<string> {
+    const arrayBuffer = await blob.arrayBuffer();
+    let binary = '';
+    const bytes = new Uint8Array(arrayBuffer);
+    const chunkSize = 0x8000;
+
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(
+        i,
+        Math.min(i + chunkSize, bytes.length)
+      );
+      binary += String.fromCharCode(...chunk);
+    }
+
+    return btoa(binary);
   }
 
   async function handleDownload() {
     setBusy(true);
+
     try {
       const blob = await getFinalBlob();
+      const fileName = `tally-exam-trend-${new Date()
+        .toISOString()
+        .slice(0, 10)}.png`;
+
+      if (Capacitor.isNativePlatform()) {
+        const base64Data = await blobToBase64(blob);
+
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Documents,
+        });
+
+        return;
+      }
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
+
       a.href = url;
-      a.download = `tally-exam-trend-${new Date().toISOString().slice(0, 10)}.png`;
+      a.download = fileName;
+      a.style.display = 'none';
+
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } finally {
       setBusy(false);
     }
@@ -109,14 +167,21 @@ export function ShareableExamCard({ open, onClose, points }: ShareableExamCardPr
 
   async function handleShare() {
     setBusy(true);
+
     try {
       const blob = await getFinalBlob();
-      const file = new File([blob], 'tally-exam-trend.png', { type: 'image/png' });
-      await navigator.share({ files: [file], title: 'Exam Score Trend — Tally' });
+      const file = new File(
+        [blob],
+        'tally-exam-trend.png',
+        { type: 'image/png' }
+      );
+
+      await navigator.share({
+        files: [file],
+        title: 'Exam Score Trend — Tally',
+      });
     } catch (err) {
-      // AbortError just means the person closed the native share sheet — not a real failure
       if ((err as Error)?.name !== 'AbortError') {
-        // fall back silently to download so they still get the image
         await handleDownload();
       }
     } finally {
@@ -131,12 +196,20 @@ export function ShareableExamCard({ open, onClose, points }: ShareableExamCardPr
       title="Share exam trend"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={handleDownload} disabled={busy}>
+          <Button
+            variant="secondary"
+            onClick={handleDownload}
+            disabled={busy}
+          >
             <Download size={16} />
             Download
           </Button>
+
           {canShareFiles && (
-            <Button onClick={handleShare} disabled={busy}>
+            <Button
+              onClick={handleShare}
+              disabled={busy}
+            >
               <Share2 size={16} />
               Share
             </Button>
@@ -144,10 +217,18 @@ export function ShareableExamCard({ open, onClose, points }: ShareableExamCardPr
         </div>
       }
     >
-      <div className="mx-auto w-full max-w-sm" style={{ aspectRatio: `${CARD_WIDTH} / ${CARD_HEIGHT}` }}>
+      <div
+        className="mx-auto w-full max-w-sm"
+        style={{
+          aspectRatio: `${CARD_WIDTH} / ${CARD_HEIGHT}`,
+        }}
+      >
         <canvas
           ref={canvasRef}
-          style={{ width: '100%', height: '100%' }}
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
           aria-label="Exam score trend, shareable card"
         />
       </div>
