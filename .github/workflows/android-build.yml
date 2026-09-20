@@ -39,6 +39,9 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Generate branded icons and splash screen
+        run: npx --yes @capacitor/assets generate --android
+
       - name: Sync Capacitor native project
         run: npx cap sync android
 
