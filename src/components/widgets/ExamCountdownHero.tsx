@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CalendarClock } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge, EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/Progress';
+import { useCountUp } from '@/hooks/useCountUp';
 import { daysBetween, todayISO, formatDate } from '@/lib/dates';
 import type { Exam } from '@/types';
 
@@ -17,6 +18,9 @@ interface ExamCountdownHeroProps {
 }
 
 export function ExamCountdownHero({ exam, syllabusProgress, onAddExam }: ExamCountdownHeroProps) {
+  const days = exam ? Math.max(daysBetween(todayISO(), exam.date), 0) : 0;
+  const animatedDays = useCountUp(days, 700);
+
   if (!exam) {
     return (
       <GlassCard className="p-5">
@@ -24,6 +28,7 @@ export function ExamCountdownHero({ exam, syllabusProgress, onAddExam }: ExamCou
         <EmptyState
           title="No upcoming exams"
           description="Exams you add will show up here."
+          icon={CalendarClock}
           action={
             <Button size="sm" variant="secondary" onClick={onAddExam}>
               Add exam
@@ -34,12 +39,11 @@ export function ExamCountdownHero({ exam, syllabusProgress, onAddExam }: ExamCou
     );
   }
 
-  const days = daysBetween(todayISO(), exam.date);
   const hasScore = exam.correct !== undefined || exam.manualScoreOverride !== undefined;
 
   return (
     <Link to={`/exams/${exam.id}`}>
-      <GlassCard interactive className="p-5">
+      <GlassCard interactive accented className="p-5">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Next exam</p>
@@ -50,7 +54,7 @@ export function ExamCountdownHero({ exam, syllabusProgress, onAddExam }: ExamCou
 
         <div className="mt-3 flex items-baseline gap-2">
           <span className="font-display text-5xl font-bold tabular-nums text-accent">
-            {Math.max(days, 0)}
+            {animatedDays}
           </span>
           <span className="text-sm font-medium uppercase tracking-wide text-ink-muted">
             {days === 0 ? 'today' : days === 1 ? 'day' : 'days'}

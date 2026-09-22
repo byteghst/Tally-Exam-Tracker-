@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Share2 } from 'lucide-react';
+import { Share2, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/Badge';
@@ -30,6 +30,7 @@ export function ExamScoreTrendChart({ exams }: { exams: Exam[] }) {
         <EmptyState
           title="Not enough data yet"
           description="Add a couple more completed exams with total marks set to see a trend line."
+          icon={TrendingUp}
         />
       ) : (
         <>

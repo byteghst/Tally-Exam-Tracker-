@@ -112,7 +112,7 @@ export function SyllabusForm({ open, onClose, node, defaultParentId }: SyllabusF
       }
       onClose();
     } catch {
-      pushToast('Something went wrong saving this item. Please try again.');
+      pushToast('Something went wrong saving this item. Please try again.', undefined, 'error');
     } finally {
       setSubmitting(false);
     }

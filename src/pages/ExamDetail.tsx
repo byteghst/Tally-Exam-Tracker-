@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { ExamForm } from '@/components/features/exams/ExamForm';
 import { useExamStore } from '@/store/examStore';
 import { useUIStore } from '@/store/uiStore';
+import { useCountUp } from '@/hooks/useCountUp';
 import { calculateScore } from '@/lib/scoring';
 import { compareToPrevious } from '@/lib/examComparison';
 import { formatDate } from '@/lib/dates';
@@ -111,14 +112,17 @@ export function ExamDetail() {
       )}
 
       <GlassCard className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
-        <Stat label="Final score" value={score.finalScore} />
-        <Stat label="Percentage" value={score.percentage !== null ? `${score.percentage}%` : '—'} />
-        <Stat label="Accuracy" value={score.accuracy !== null ? `${score.accuracy}%` : '—'} />
-        <Stat label="Rank" value={exam.rank ? `${exam.rank}${exam.participants ? ` / ${exam.participants}` : ''}` : '—'} />
-        <Stat label="Correct" value={exam.correct ?? '—'} />
-        <Stat label="Wrong" value={exam.wrong ?? '—'} />
-        <Stat label="Unanswered" value={exam.unanswered ?? '—'} />
-        <Stat label="Attempt rate" value={score.attemptRate !== null ? `${score.attemptRate}%` : '—'} />
+        <Stat label="Final score" value={score.finalScore} decimals={1} />
+        <Stat label="Percentage" value={score.percentage} suffix="%" decimals={1} />
+        <Stat label="Accuracy" value={score.accuracy} suffix="%" decimals={1} />
+        <Stat
+          label="Rank"
+          raw={exam.rank ? `${exam.rank}${exam.participants ? ` / ${exam.participants}` : ''}` : '—'}
+        />
+        <Stat label="Correct" value={exam.correct ?? null} />
+        <Stat label="Wrong" value={exam.wrong ?? null} />
+        <Stat label="Unanswered" value={exam.unanswered ?? null} />
+        <Stat label="Attempt rate" value={score.attemptRate} suffix="%" decimals={1} />
       </GlassCard>
 
       {score.isManualOverride && (
@@ -169,11 +173,25 @@ function ComparisonStat({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function Stat({
+  label,
+  value,
+  suffix,
+  decimals = 0,
+  raw
+}: {
+  label: string;
+  value?: number | null;
+  suffix?: string;
+  decimals?: number;
+  raw?: string;
+}) {
+  const animated = useCountUp(value ?? 0, 500, decimals);
+  const display = raw !== undefined ? raw : value === null || value === undefined ? '—' : `${animated}${suffix ?? ''}`;
   return (
     <div>
       <p className="text-xs text-ink-faint">{label}</p>
-      <p className="font-display text-lg font-semibold tabular-nums text-ink">{value}</p>
+      <p className="font-display text-lg font-semibold tabular-nums text-ink">{display}</p>
     </div>
   );
 }

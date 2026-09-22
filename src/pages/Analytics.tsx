@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Award } from 'lucide-react';
+import { Award, BarChart3 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/Badge';
 import { ExamScoreTrendChart } from '@/components/features/analytics/ExamScoreTrendChart';
@@ -10,6 +10,7 @@ import { useDeadlineStore } from '@/store/deadlineStore';
 import { useSyllabusStore } from '@/store/syllabusStore';
 import { calculateScore } from '@/lib/scoring';
 import { computeMilestones } from '@/lib/milestones';
+import { useCountUp } from '@/hooks/useCountUp';
 import { db } from '@/data/db';
 import type { ActivityLogEntry } from '@/types';
 
@@ -70,6 +71,7 @@ export function Analytics() {
           <EmptyState
             title="Not enough data yet"
             description="Analytics build up automatically from exams and tasks you record — nothing is estimated."
+            icon={BarChart3}
           />
         </div>
       </div>
@@ -81,9 +83,9 @@ export function Analytics() {
       <h1 className="font-display text-2xl font-semibold text-ink">Analytics</h1>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <MetricCard label="Total exams" value={exams.length} />
-        <MetricCard label="Average percentage" value={avgPercentage !== null ? `${avgPercentage}%` : '—'} />
+        <MetricCard label="Average percentage" value={avgPercentage} suffix="%" />
         <MetricCard label="Total tasks" value={tasks.length} />
-        <MetricCard label="Task completion" value={taskCompletionRate !== null ? `${taskCompletionRate}%` : '—'} />
+        <MetricCard label="Task completion" value={taskCompletionRate} suffix="%" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -111,11 +113,14 @@ export function Analytics() {
   );
 }
 
-function MetricCard({ label, value }: { label: string; value: string | number }) {
+function MetricCard({ label, value, suffix }: { label: string; value: number | null; suffix?: string }) {
+  const animated = useCountUp(value ?? 0, 700, suffix === '%' ? 1 : 0);
   return (
     <GlassCard className="p-4">
       <p className="text-xs text-ink-faint">{label}</p>
-      <p className="mt-1 font-display text-xl font-semibold tabular-nums text-ink">{value}</p>
+      <p className="mt-1 font-display text-xl font-semibold tabular-nums text-ink">
+        {value === null ? '—' : `${animated}${suffix ?? ''}`}
+      </p>
     </GlassCard>
   );
 }

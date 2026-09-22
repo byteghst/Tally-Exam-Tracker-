@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { FileSpreadsheet } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge, EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -71,6 +72,7 @@ export function Exams() {
         <EmptyState
           title="No exams yet"
           description="Your exam history will appear here once you add your first exam."
+          icon={FileSpreadsheet}
           action={
             <Button size="sm" onClick={() => setFormOpen(true)}>
               Add your first exam

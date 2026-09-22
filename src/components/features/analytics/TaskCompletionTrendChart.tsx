@@ -1,4 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart3 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/Badge';
 import { toISODate, parseISODate } from '@/lib/dates';
@@ -48,6 +49,7 @@ export function TaskCompletionTrendChart({ tasks }: { tasks: Task[] }) {
         <EmptyState
           title="No dated tasks yet"
           description="Tasks with a date will show your day-by-day completion rate here."
+          icon={BarChart3}
         />
       ) : (
         <ResponsiveContainer width="100%" height={220}>

@@ -91,7 +91,7 @@ export function DeadlineForm({ open, onClose, deadline }: DeadlineFormProps) {
       }
       onClose();
     } catch {
-      pushToast('Something went wrong saving this deadline. Please try again.');
+      pushToast('Something went wrong saving this deadline. Please try again.', undefined, 'error');
     } finally {
       setSubmitting(false);
     }

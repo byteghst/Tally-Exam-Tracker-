@@ -123,7 +123,7 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
       }
       onClose();
     } catch {
-      pushToast('Something went wrong saving this task. Please try again.');
+      pushToast('Something went wrong saving this task. Please try again.', undefined, 'error');
     } finally {
       setSubmitting(false);
     }

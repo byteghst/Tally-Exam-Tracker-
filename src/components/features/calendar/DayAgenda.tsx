@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FileSpreadsheet, Clock, ListChecks, Pencil } from 'lucide-react';
+import { FileSpreadsheet, Clock, ListChecks, Pencil, CalendarX2 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge, EmptyState } from '@/components/ui/Badge';
 import type { Exam, Deadline, Task } from '@/types';
@@ -28,6 +28,7 @@ export function DayAgenda({
       <EmptyState
         title="Nothing on this day"
         description="Exams, deadlines and tasks for the selected date will show up here."
+        icon={CalendarX2}
       />
     );
   }

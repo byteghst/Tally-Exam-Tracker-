@@ -1,21 +1,24 @@
 import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { ToastStack } from './ToastStack';
 import { TopBar } from './TopBar';
 import { CommandPalette } from './CommandPalette';
+import { PageTransition } from './PageTransition';
 import { OnboardingOverlay } from '@/components/features/onboarding/OnboardingOverlay';
+import { ConfettiBurst } from '@/components/features/celebration/ConfettiBurst';
 import { useExamStore } from '@/store/examStore';
 import { useDeadlineStore } from '@/store/deadlineStore';
 import { useTaskStore } from '@/store/taskStore';
 import { useSyllabusStore } from '@/store/syllabusStore';
+import { useMilestoneCelebration } from '@/hooks/useMilestoneCelebration';
 
 export function AppShell() {
   const hydrateExams = useExamStore((s) => s.hydrate);
   const hydrateDeadlines = useDeadlineStore((s) => s.hydrate);
   const hydrateTasks = useTaskStore((s) => s.hydrate);
   const hydrateSyllabus = useSyllabusStore((s) => s.hydrate);
+  const { celebrating, finishCelebrating } = useMilestoneCelebration();
 
   // hydrate everything once at the shell level so search/command-palette
   // results are available immediately regardless of which page loads first;
@@ -34,13 +37,14 @@ export function AppShell() {
       <div className="flex-1 min-w-0">
         <main className="mx-auto max-w-6xl px-4 pb-24 pt-safe-top md:px-8 md:pb-8">
           <TopBar />
-          <Outlet />
+          <PageTransition />
         </main>
       </div>
       <BottomNav />
       <ToastStack />
       <CommandPalette />
       <OnboardingOverlay />
+      {celebrating && <ConfettiBurst onDone={finishCelebrating} />}
     </div>
   );
 }

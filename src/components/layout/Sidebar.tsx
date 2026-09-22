@@ -32,20 +32,30 @@ export function Sidebar() {
             title={item.label}
             className={({ isActive }) =>
               clsx(
-                'group flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive ? 'bg-accent/15 text-accent' : 'text-ink-muted hover:bg-white/5 hover:text-ink'
+                'group relative flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                isActive ? 'bg-accent/15 text-accent' : 'text-ink-muted hover:bg-white/5 hover:text-ink active:scale-[0.98]'
               )
             }
           >
-            <item.icon size={20} className="shrink-0" />
-            {!collapsed && <span>{item.label}</span>}
+            {({ isActive }) => (
+              <>
+                <span
+                  className={clsx(
+                    'absolute left-0 h-5 w-1 rounded-r-full bg-accent transition-transform duration-200',
+                    isActive ? 'scale-y-100' : 'scale-y-0'
+                  )}
+                />
+                <item.icon size={20} className="shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
 
       <button
         onClick={() => setCollapsed((c) => !c)}
-        className="m-2 flex items-center justify-center gap-2 rounded-control py-2 text-ink-muted hover:bg-white/5 hover:text-ink"
+        className="m-2 flex items-center justify-center gap-2 rounded-control py-2 text-ink-muted transition-all hover:bg-white/5 hover:text-ink active:scale-95"
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {collapsed ? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}

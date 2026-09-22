@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Trash2, Repeat } from 'lucide-react';
+import { Pencil, Trash2, Repeat, PartyPopper } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -53,6 +53,7 @@ export function Tasks() {
           <EmptyState
             title="You're clear"
             description="Nothing needs your attention today."
+            icon={PartyPopper}
             action={
               <Button size="sm" onClick={openAdd}>
                 Add a task

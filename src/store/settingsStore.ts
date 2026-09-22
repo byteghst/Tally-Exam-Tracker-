@@ -27,7 +27,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   streaksEnabled: true,
   onboardingCompleted: false,
   showFocusNow: true,
-  showDailyMission: true
+  showDailyMission: true,
+  celebratedMilestoneIds: [],
+  celebrationBaselineDone: false
 };
 
 interface SettingsStore {

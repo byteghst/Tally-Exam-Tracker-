@@ -1,3 +1,4 @@
+import { Clock } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -23,6 +24,7 @@ export function NextDeadlineWidget({
         <EmptyState
           title="No deadlines coming up"
           description="Registration dates and submissions will show up here."
+          icon={Clock}
           action={
             <Button size="sm" variant="secondary" onClick={onAddDeadline}>
               Add deadline

@@ -147,7 +147,7 @@ export function ExamForm({ open, onClose, exam, defaultType }: ExamFormProps) {
       }
       onClose();
     } catch {
-      pushToast('Something went wrong saving this exam. Please try again.');
+      pushToast('Something went wrong saving this exam. Please try again.', undefined, 'error');
     } finally {
       setSubmitting(false);
     }

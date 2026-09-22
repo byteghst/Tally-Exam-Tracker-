@@ -171,6 +171,15 @@ export interface AppSettings {
   showDailyMission: boolean;
   /** ISO date the Daily Mission was last dismissed; hides it for that day only. */
   dailyMissionDismissedDate?: string;
+  /** Milestone ids (from lib/milestones.ts) already celebrated with the
+   *  confetti moment, so a milestone only gets that treatment once — it
+   *  still always appears in the plain Analytics list regardless. */
+  celebratedMilestoneIds: string[];
+  /** True once the celebration system has done its one-time "baseline"
+   *  pass — silently marking whatever's already achieved as seen, so
+   *  someone with months of existing history doesn't get a confetti-spam
+   *  burst of "achievements" the moment this feature ships. */
+  celebrationBaselineDone: boolean;
 }
 
 // ---------- Scoring engine I/O ----------

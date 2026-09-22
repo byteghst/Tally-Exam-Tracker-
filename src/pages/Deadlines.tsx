@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Clock } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge, EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -53,7 +53,7 @@ export function Deadlines() {
       </header>
 
       {active.length === 0 ? (
-        <EmptyState title="No deadlines coming up" description="Registration dates and submissions will show up here." action={
+        <EmptyState title="No deadlines coming up" description="Registration dates and submissions will show up here." icon={Clock} action={
             <Button size="sm" onClick={openAdd}>
               Add your first deadline
             </Button>

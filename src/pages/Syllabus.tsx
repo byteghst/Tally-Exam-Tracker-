@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BookOpen } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { ProgressRing } from '@/components/ui/Progress';
 import { EmptyState } from '@/components/ui/Badge';
@@ -69,6 +70,7 @@ export function Syllabus() {
         <EmptyState
           title="Your syllabus is empty"
           description="Add your first topic to start tracking progress."
+          icon={BookOpen}
           action={
             <Button size="sm" onClick={openAdd}>
               Create your first item

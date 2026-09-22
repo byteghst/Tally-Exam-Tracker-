@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileSpreadsheet, Clock, ListChecks, BookOpen } from 'lucide-react';
+import { FileSpreadsheet, Clock, ListChecks, BookOpen, History as HistoryIcon } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/Badge';
 import { db } from '@/data/db';
@@ -35,6 +35,7 @@ export function History() {
         <EmptyState
           title="No activity yet"
           description="Actions like adding an exam or completing a task will be logged here."
+          icon={HistoryIcon}
         />
       ) : (
         <div className="space-y-2">

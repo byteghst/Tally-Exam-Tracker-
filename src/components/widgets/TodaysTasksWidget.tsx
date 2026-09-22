@@ -1,7 +1,9 @@
+import { PartyPopper } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { ProgressBar } from '@/components/ui/Progress';
 import { EmptyState } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { useCountUp } from '@/hooks/useCountUp';
 import type { Task } from '@/types';
 
 interface TodaysTasksWidgetProps {
@@ -12,6 +14,7 @@ interface TodaysTasksWidgetProps {
 
 export function TodaysTasksWidget({ tasks, onToggle, onAddTask }: TodaysTasksWidgetProps) {
   const completed = tasks.filter((t) => t.status === 'completed').length;
+  const animatedCompleted = useCountUp(completed, 400);
 
   return (
     <GlassCard className="p-5">
@@ -20,6 +23,7 @@ export function TodaysTasksWidget({ tasks, onToggle, onAddTask }: TodaysTasksWid
         <EmptyState
           title="You're clear"
           description="Nothing needs your attention today."
+          icon={PartyPopper}
           action={
             <Button size="sm" variant="secondary" onClick={onAddTask}>
               Add task
@@ -29,7 +33,7 @@ export function TodaysTasksWidget({ tasks, onToggle, onAddTask }: TodaysTasksWid
       ) : (
         <>
           <p className="mt-2 font-display text-2xl font-semibold tabular-nums">
-            {completed}/{tasks.length}
+            {animatedCompleted}/{tasks.length}
           </p>
           <ProgressBar value={(completed / tasks.length) * 100} className="mt-3" />
           <ul className="mt-4 space-y-2">
