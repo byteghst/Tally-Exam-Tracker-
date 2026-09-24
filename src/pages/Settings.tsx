@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChevronUp, ChevronDown, Bell, BellOff } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -8,15 +9,51 @@ import { ImportDialog } from '@/components/features/settings/ImportDialog';
 import { useSettingsStore } from '@/store/settingsStore';
 import { exportBackup, downloadBackupFile } from '@/data/backup';
 import { normalizeLayout, WIDGET_LABELS } from '@/lib/dashboardWidgets';
+import {
+  requestNativeNotificationPermission,
+  getNativeNotificationPermission,
+  sendTestNativeNotification
+} from '@/lib/notifications/nativeScheduler';
+import {
+  requestWebNotificationPermission,
+  getWebNotificationPermission,
+  sendTestWebNotification,
+  isWebNotificationSupported
+} from '@/lib/notifications/webChecker';
 import type { ThemeMode, DensityLevel } from '@/types';
 
 const THEME_OPTIONS: ThemeMode[] = ['light', 'dark', 'system'];
 const DENSITY_OPTIONS: DensityLevel[] = ['comfortable', 'compact'];
 
+type PermissionState = 'unknown' | 'granted' | 'denied' | 'unsupported';
+
 export function Settings() {
   const { settings, updateSettings, resetSettings } = useSettingsStore();
   const [importOpen, setImportOpen] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [permission, setPermission] = useState<PermissionState>('unknown');
+  const isNative = Capacitor.isNativePlatform();
+
+  useEffect(() => {
+    if (isNative) {
+      getNativeNotificationPermission().then((granted) => setPermission(granted ? 'granted' : 'denied'));
+    } else if (isWebNotificationSupported()) {
+      const p = getWebNotificationPermission();
+      setPermission(p === 'granted' ? 'granted' : p === 'denied' ? 'denied' : 'unknown');
+    } else {
+      setPermission('unsupported');
+    }
+  }, [isNative]);
+
+  async function handleEnableNotifications() {
+    const granted = isNative ? await requestNativeNotificationPermission() : await requestWebNotificationPermission();
+    setPermission(granted ? 'granted' : 'denied');
+  }
+
+  function handleTestNotification() {
+    if (isNative) sendTestNativeNotification();
+    else sendTestWebNotification();
+  }
 
   const widgetItems = normalizeLayout(settings.dashboardLayout);
 
@@ -196,6 +233,67 @@ export function Settings() {
             </div>
           ))}
         </div>
+      </GlassCard>
+
+      <GlassCard className="space-y-3 p-5">
+        <h2 className="font-medium text-ink">Notifications</h2>
+
+        {permission === 'unsupported' ? (
+          <p className="text-sm text-ink-muted">Notifications aren't supported in this browser.</p>
+        ) : (
+          <>
+            <div className="flex items-center justify-between rounded-control border border-border p-3">
+              <div className="flex items-center gap-2 text-sm text-ink">
+                {permission === 'granted' ? (
+                  <Bell size={16} className="text-success" />
+                ) : (
+                  <BellOff size={16} className="text-ink-faint" />
+                )}
+                {permission === 'granted' ? 'Notifications enabled' : 'Notifications not enabled'}
+              </div>
+              {permission !== 'granted' && (
+                <Button size="sm" onClick={handleEnableNotifications}>
+                  Enable
+                </Button>
+              )}
+            </div>
+
+            <label className="flex items-center justify-between rounded-control border border-border p-3 text-sm text-ink">
+              Exam reminders
+              <input
+                type="checkbox"
+                checked={settings.notificationPrefs.exams}
+                onChange={(e) =>
+                  updateSettings({ notificationPrefs: { ...settings.notificationPrefs, exams: e.target.checked } })
+                }
+                className="h-4 w-4 rounded accent-accent"
+              />
+            </label>
+            <label className="flex items-center justify-between rounded-control border border-border p-3 text-sm text-ink">
+              Deadline reminders
+              <input
+                type="checkbox"
+                checked={settings.notificationPrefs.deadlines}
+                onChange={(e) =>
+                  updateSettings({ notificationPrefs: { ...settings.notificationPrefs, deadlines: e.target.checked } })
+                }
+                className="h-4 w-4 rounded accent-accent"
+              />
+            </label>
+
+            {permission === 'granted' && (
+              <Button size="sm" variant="secondary" onClick={handleTestNotification}>
+                Send a test notification
+              </Button>
+            )}
+
+            <p className="text-xs text-ink-faint">
+              {isNative
+                ? 'Set a reminder time on any exam or deadline and the app will notify you, even if it\'s closed.'
+                : "Set a reminder time on any exam or deadline. In a browser, this can only notify you while the tab or installed app is actually open — there's no way for a website to wake up on its own to fire a notification while fully closed."}
+            </p>
+          </>
+        )}
       </GlassCard>
 
       <GlassCard className="space-y-3 p-5">

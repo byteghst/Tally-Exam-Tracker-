@@ -39,6 +39,7 @@ export interface Exam extends BaseEntity {
   participants?: number;
   status: ExamStatus;
   notes?: string;
+  reminderMinutesBefore?: number;
   tagIds: ID[];
   customFields?: Record<string, string | number | boolean>;
 }
@@ -180,6 +181,10 @@ export interface AppSettings {
    *  someone with months of existing history doesn't get a confetti-spam
    *  burst of "achievements" the moment this feature ships. */
   celebrationBaselineDone: boolean;
+  /** Composite ids (e.g. "exam-<id>") of reminders already shown by the
+   *  web notification checker, so re-checking doesn't repeat them. Native
+   *  notifications don't need this — the OS itself tracks fired alarms. */
+  notifiedReminderIds: string[];
 }
 
 // ---------- Scoring engine I/O ----------

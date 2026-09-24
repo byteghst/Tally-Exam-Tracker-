@@ -1,5 +1,6 @@
 import type { Exam, Deadline, Task, SyllabusNode } from '@/types';
 import { daysBetween, todayISO } from '@/lib/dates';
+import { sortExamsByDateTime } from '@/lib/examSort';
 
 export interface FocusRecommendation {
   eyebrow: string;
@@ -48,9 +49,9 @@ export function computeFocusNow({ exams, deadlines, tasks, syllabusNodes }: Focu
   }
 
   // 2. An exam within the horizon
-  const soonExams = exams
-    .filter((e) => e.status === 'upcoming' && daysBetween(today, e.date) >= 0 && daysBetween(today, e.date) <= EXAM_HORIZON_DAYS)
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const soonExams = sortExamsByDateTime(
+    exams.filter((e) => e.status === 'upcoming' && daysBetween(today, e.date) >= 0 && daysBetween(today, e.date) <= EXAM_HORIZON_DAYS)
+  );
   if (soonExams.length > 0) {
     const e = soonExams[0];
     const days = daysBetween(today, e.date);

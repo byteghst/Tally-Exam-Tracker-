@@ -29,7 +29,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   showFocusNow: true,
   showDailyMission: true,
   celebratedMilestoneIds: [],
-  celebrationBaselineDone: false
+  celebrationBaselineDone: false,
+  notifiedReminderIds: []
 };
 
 interface SettingsStore {

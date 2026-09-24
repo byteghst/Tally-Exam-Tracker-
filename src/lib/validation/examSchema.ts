@@ -23,7 +23,8 @@ export const examFormSchema = z
     rank: z.coerce.number().int().min(1, 'Rank must be at least 1').optional().or(z.literal('')),
     participants: z.coerce.number().int().min(1, 'Must be at least 1').optional().or(z.literal('')),
     status: z.enum(['upcoming', 'completed', 'missed', 'archived']),
-    notes: z.string().max(2000, 'Keep notes under 2000 characters').optional()
+    notes: z.string().max(2000, 'Keep notes under 2000 characters').optional(),
+    reminderMinutesBefore: z.coerce.number().int().min(0, 'Cannot be negative').optional().or(z.literal(''))
   })
   .superRefine((data, ctx) => {
     const total = toNum(data.totalQuestions);

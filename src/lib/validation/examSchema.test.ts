@@ -55,4 +55,14 @@ describe('examFormSchema', () => {
     const result = examFormSchema.safeParse({ ...base, positiveMarks: -1 });
     expect(result.success).toBe(false);
   });
+
+  it('rejects a negative reminder offset', () => {
+    const result = examFormSchema.safeParse({ ...base, reminderMinutesBefore: -10 });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a valid reminder offset', () => {
+    const result = examFormSchema.safeParse({ ...base, reminderMinutesBefore: 60 });
+    expect(result.success).toBe(true);
+  });
 });

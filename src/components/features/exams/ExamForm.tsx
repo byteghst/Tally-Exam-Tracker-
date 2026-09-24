@@ -39,7 +39,8 @@ function examToFormState(exam?: Exam, defaultType: ExamType = 'daily') {
     rank: exam?.rank?.toString() ?? '',
     participants: exam?.participants?.toString() ?? '',
     status: exam?.status ?? ('upcoming' as ExamStatus),
-    notes: exam?.notes ?? ''
+    notes: exam?.notes ?? '',
+    reminderMinutesBefore: exam?.reminderMinutesBefore?.toString() ?? ''
   };
 }
 
@@ -97,7 +98,8 @@ export function ExamForm({ open, onClose, exam, defaultType }: ExamFormProps) {
       unanswered: form.unanswered === '' ? '' : Number(form.unanswered),
       manualScoreOverride: form.manualScoreOverride === '' ? '' : Number(form.manualScoreOverride),
       rank: form.rank === '' ? '' : Number(form.rank),
-      participants: form.participants === '' ? '' : Number(form.participants)
+      participants: form.participants === '' ? '' : Number(form.participants),
+      reminderMinutesBefore: form.reminderMinutesBefore === '' ? '' : Number(form.reminderMinutesBefore)
     } as ExamFormValues;
 
     const result = examFormSchema.safeParse(toValidate);
@@ -134,6 +136,7 @@ export function ExamForm({ open, onClose, exam, defaultType }: ExamFormProps) {
       participants: numOrUndef(v.participants),
       status: v.status,
       notes: v.notes?.trim() || undefined,
+      reminderMinutesBefore: numOrUndef(v.reminderMinutesBefore),
       tagIds: exam?.tagIds ?? []
     };
 
@@ -234,6 +237,15 @@ export function ExamForm({ open, onClose, exam, defaultType }: ExamFormProps) {
               </select>
             </div>
           </div>
+          <Input
+            label="Remind me (minutes before)"
+            type="number"
+            inputMode="numeric"
+            value={form.reminderMinutesBefore}
+            onChange={(e) => set('reminderMinutesBefore', e.target.value)}
+            error={errors.reminderMinutesBefore}
+            placeholder="e.g. 60"
+          />
         </section>
 
         {/* Scoring */}

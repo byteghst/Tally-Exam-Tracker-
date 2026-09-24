@@ -12,6 +12,7 @@ import { useDeadlineStore } from '@/store/deadlineStore';
 import { useTaskStore } from '@/store/taskStore';
 import { useSyllabusStore } from '@/store/syllabusStore';
 import { useMilestoneCelebration } from '@/hooks/useMilestoneCelebration';
+import { useNotificationSync } from '@/hooks/useNotificationSync';
 
 export function AppShell() {
   const hydrateExams = useExamStore((s) => s.hydrate);
@@ -19,6 +20,7 @@ export function AppShell() {
   const hydrateTasks = useTaskStore((s) => s.hydrate);
   const hydrateSyllabus = useSyllabusStore((s) => s.hydrate);
   const { celebrating, finishCelebrating } = useMilestoneCelebration();
+  useNotificationSync();
 
   // hydrate everything once at the shell level so search/command-palette
   // results are available immediately regardless of which page loads first;

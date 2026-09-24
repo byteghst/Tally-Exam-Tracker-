@@ -18,6 +18,7 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { db } from '@/data/db';
 import { isFuture, todayISO } from '@/lib/dates';
 import { getVisibleOrderedIds } from '@/lib/dashboardWidgets';
+import { sortExamsByDateTime } from '@/lib/examSort';
 import { computeDailyMission } from '@/lib/dailyMission';
 import type { ActivityLogEntry } from '@/types';
 
@@ -42,9 +43,9 @@ export function Dashboard() {
   }, [hydrateExams, hydrateDeadlines, hydrateTasks, hydrateSyllabus]);
 
   const todaysTasks = tasks.filter((t) => t.date === todayISO());
-  const nextExam = exams
-    .filter((e) => e.status === 'upcoming' && isFuture(e.date))
-    .sort((a, b) => a.date.localeCompare(b.date))[0];
+  const nextExam = sortExamsByDateTime(
+    exams.filter((e) => e.status === 'upcoming' && isFuture(e.date))
+  )[0];
   const nextDeadline = deadlines
     .filter((d) => d.status !== 'completed' && d.status !== 'archived')
     .sort((a, b) => a.date.localeCompare(b.date))[0];

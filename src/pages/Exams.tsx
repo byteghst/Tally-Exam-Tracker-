@@ -9,6 +9,7 @@ import { useExamStore } from '@/store/examStore';
 import { useOpenAddFromNavState } from '@/hooks/useOpenAddFromNavState';
 import { calculateScore } from '@/lib/scoring';
 import { formatDate } from '@/lib/dates';
+import { sortExamsByDateTime } from '@/lib/examSort';
 import type { ExamType } from '@/types';
 
 const FILTERS: Array<{ label: string; value: ExamType | 'all' }> = [
@@ -42,7 +43,7 @@ export function Exams() {
     setFilter(filterFromPath(location.pathname));
   }, [location.pathname]);
 
-  const filtered = filter === 'all' ? exams : exams.filter((e) => e.type === filter);
+  const filtered = sortExamsByDateTime(filter === 'all' ? exams : exams.filter((e) => e.type === filter));
   const addDefaultType: ExamType = filter === 'all' ? 'daily' : filter;
 
   return (
