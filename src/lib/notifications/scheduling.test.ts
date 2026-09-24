@@ -73,6 +73,7 @@ describe('getDueReminders', () => {
     // fires at 9:45, "now" is 10:00 — 15 minutes ago, within default 30-min grace
     const items = getDueReminders(
       [exam({ date: '2026-09-19', startTime: '10:00', reminderMinutesBefore: 15 })],
+      [],
       []
     );
     expect(items).toHaveLength(1);
@@ -81,6 +82,7 @@ describe('getDueReminders', () => {
   it('excludes a reminder that already fired outside the grace window', () => {
     const items = getDueReminders(
       [exam({ date: '2026-09-18', startTime: '10:00', reminderMinutesBefore: 15 })], // fired yesterday
+      [],
       []
     );
     expect(items).toEqual([]);
@@ -89,6 +91,7 @@ describe('getDueReminders', () => {
   it('excludes a reminder already recorded as notified', () => {
     const items = getDueReminders(
       [exam({ id: 'e1', date: '2026-09-19', startTime: '10:00', reminderMinutesBefore: 15 })],
+      [],
       ['exam-e1']
     );
     expect(items).toEqual([]);
@@ -97,8 +100,10 @@ describe('getDueReminders', () => {
   it('excludes reminders still in the future', () => {
     const items = getDueReminders(
       [exam({ date: '2026-09-25', reminderMinutesBefore: 60 })],
+      [],
       []
     );
     expect(items).toEqual([]);
   });
 });
+             
