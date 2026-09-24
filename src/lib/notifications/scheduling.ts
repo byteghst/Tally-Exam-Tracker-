@@ -86,15 +86,12 @@ export function getFutureReminders(exams: Exam[], deadlines: Deadline[], now: Da
 /**
  * Reminders whose fire time has already passed (within a grace window, so a
  * closed tab/app that was reopened doesn't miss one entirely) and that
- * haven't already been shown. This is what the web checker uses — it can
- * only act while the app is actually open, since standard web
- * notifications have no reliable way to fire on their own when a tab or
- * installed PWA isn't running.
+ * haven't already been shown.
  */
 export function getDueReminders(
   exams: Exam[],
   deadlines: Deadline[],
-  alreadyNotifiedIds: string[],
+  alreadyNotifiedIds: string[] = [],
   now: Date = new Date(),
   graceMinutes = 30
 ): ReminderItem[] {
@@ -112,4 +109,5 @@ export function getDueReminders(
  *  future-only filter doesn't exclude anything. */
 function getAllReminders(exams: Exam[], deadlines: Deadline[]): ReminderItem[] {
   return getFutureReminders(exams, deadlines, new Date(0));
-}
+                                               }
+                                   
